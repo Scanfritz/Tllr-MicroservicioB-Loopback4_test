@@ -18,6 +18,7 @@ import {
   response,
   ResponseObject,
 } from '@loopback/rest';
+import { totalmem } from 'os';
 import {Input} from '../models';
 import {InputRepository} from '../repositories';
 
@@ -123,7 +124,7 @@ const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: str
 
     // console.log(couponConditions);
 
-    if((couponConditions[0] && couponConditions[1] && couponConditions[2] && couponConditions[3] && couponConditions[4]) == true){
+    if(couponConditions.every(values => values == true)){
       validCoupons.push(true);
     }
     else{
@@ -136,19 +137,22 @@ const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: str
     if(validCoupons[i] == true){
       // console.log(couponDB[i]);
       // console.log(discountDB[i]);
-      return assignToOutput(true, discountDB[i].s, discountDB[i].p, (sPrice * discountDB[i].s), (pPrice * discountDB[i].p));
+      const dSend = (sPrice * discountDB[i].s);
+      const dProd = (pPrice * discountDB[i].p);
+      return assignToOutput(true, discountDB[i].s, discountDB[i].p, dSend, dProd, ((pPrice + sPrice) - (dSend + dProd)));
     }
   }
 
-  return assignToOutput(false, 0, 0, 0, 0);
+  return assignToOutput(false, 0, 0, 0, 0, (pPrice + sPrice));
 }
 
-const assignToOutput = (hasDiscount: Boolean, dSend: number, dProd: number, qSend: number, qProd: number):object => {
+const assignToOutput = (hasDiscount: Boolean, dSend: number, dProd: number, qSend: number, qProd: number, nTotal: number):object => {
   return {
     tieneDescuento: hasDiscount,
     porcentajeDescuentoE: dSend,
     porcentajeDescuentoP: dProd,
     cantidadDescontadaE: qSend,
     cantidadDescontadaP: qProd,
+    nuevoTotal: nTotal,
   }
 }

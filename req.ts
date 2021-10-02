@@ -13,4 +13,5 @@ interface Output {
 	descuentoProducto?: number, // porcentaje de descuento
 	cantidadEnvio?: number, // cantidad a descontar sobre el total?
 	cantidadProducto?: number, // cantidad a descontar sobre el total?
+	nuevoTotal: number,
 }

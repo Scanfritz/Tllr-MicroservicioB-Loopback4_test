@@ -4,11 +4,11 @@ import {juggler} from '@loopback/repository';
 const config = {
   name: 'mongodb',
   connector: 'mongodb',
-  url: 'mongodb://root:eaguilar20211296@localhost:27017/taller?authSource=admin',
+  url: 'mongodb://admin:admin@localhost:27017/taller?authSource=admin',
   host: 'localhost',
   port: 27017,
-  user: 'root',
-  password: 'eaguilar20211296',
+  user: 'admin',
+  password: 'admin',
   database: 'taller',
   useNewUrlParser: true
 };

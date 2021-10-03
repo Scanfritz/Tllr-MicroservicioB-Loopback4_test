@@ -1,24 +1,11 @@
 import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
+  repository
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
+  getModelSchemaRef, post, requestBody,
   response,
-  ResponseObject,
+  ResponseObject
 } from '@loopback/rest';
-import { totalmem } from 'os';
 import {Input} from '../models';
 import {InputRepository} from '../repositories';
 
@@ -31,10 +18,10 @@ const INPUT_RESPONSE: ResponseObject = {
         title: 'InputResponse',
         properties: {
           tieneDescuento: {type: 'boolean'},
-          porcentajeDescuentoE: {type: 'number'},
-          porcentajeDescuentoP: {type: 'number'},
-          cantidadDescontadaE: {type: 'number'},
-          cantidadDescontadaP: {type: 'number'},
+          shipmentDiscount: {type: 'number'},
+          productDiscount: {type: 'number'},
+          amountShipmentDiscount: {type: 'number'},
+          amountProductDiscount: {type: 'number'},
         },
       },
     },
@@ -44,8 +31,8 @@ const INPUT_RESPONSE: ResponseObject = {
 export class InputController {
   constructor(
     @repository(InputRepository)
-    public inputRepository : InputRepository,
-  ) {}
+    public inputRepository: InputRepository,
+  ) { }
 
   @post('/input')
   @response(200, INPUT_RESPONSE)
@@ -66,7 +53,7 @@ export class InputController {
   }
 }
 
-const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: string, coupon: string):object => {
+const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: string, coupon: string): object => {
 
   const dataArr = [sPrice, pPrice, zone, pType, coupon];
 
@@ -76,44 +63,44 @@ const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: str
 
   let validCoupons = [];
 
-  for(let i = 0; i < couponDB.length; i++){
+  for (let i = 0; i < couponDB.length; i++) {
     const couponEls = couponDB[i].split('-');
 
     let couponConditions = [];
 
-    for(let j = 0; j < couponEls.length; j++){
-      if(couponEls[j] == '*'){
+    for (let j = 0; j < couponEls.length; j++) {
+      if (couponEls[j] == '*') {
         couponConditions.push(true);
         continue;
       }
-      else if(j == 1){
-        if(pPrice > parseInt(couponEls[j])){
+      else if (j == 1) {
+        if (pPrice > parseInt(couponEls[j])) {
           couponConditions.push(true);
           continue;
         }
-        else{
+        else {
           couponConditions.push(false);
         }
       }
-      else{
+      else {
         const couponElList = couponEls[j].split(',')
 
-        if(couponElList.length == 1){
-          if(couponElList[0].toString() == dataArr[j].toString()){
+        if (couponElList.length == 1) {
+          if (couponElList[0].toString() == dataArr[j].toString()) {
             couponConditions.push(true);
           }
-          else{
+          else {
             couponConditions.push(false);
           }
         }
-        else{
+        else {
           let elFlag = false;
-          for(let k = 0; k < couponElList.length; k++){
-            if(couponElList[k].toString() == dataArr[j].toString()){
+          for (let k = 0; k < couponElList.length; k++) {
+            if (couponElList[k].toString() == dataArr[j].toString()) {
               elFlag = true;
               break;
             }
-            else{
+            else {
               elFlag = false;
             }
           }
@@ -124,17 +111,17 @@ const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: str
 
     // console.log(couponConditions);
 
-    if(couponConditions.every(values => values == true)){
+    if (couponConditions.every(values => values == true)) {
       validCoupons.push(true);
     }
-    else{
+    else {
       validCoupons.push(false);
     }
   }
 
   // console.log(validCoupons);
-  for(let i = 0; i < validCoupons.length; i++){
-    if(validCoupons[i] == true){
+  for (let i = 0; i < validCoupons.length; i++) {
+    if (validCoupons[i] == true) {
       // console.log(couponDB[i]);
       // console.log(discountDB[i]);
       const dSend = (sPrice * discountDB[i].s);
@@ -146,13 +133,13 @@ const searchDiscount = (sPrice: number, pPrice: number, zone: number, pType: str
   return assignToOutput(false, 0, 0, 0, 0, (pPrice + sPrice));
 }
 
-const assignToOutput = (hasDiscount: Boolean, dSend: number, dProd: number, qSend: number, qProd: number, nTotal: number):object => {
+const assignToOutput = (hasDiscount: Boolean, dSend: number, dProd: number, qSend: number, qProd: number, nTotal: number): object => {
   return {
     tieneDescuento: hasDiscount,
-    porcentajeDescuentoE: dSend,
-    porcentajeDescuentoP: dProd,
-    cantidadDescontadaE: qSend,
-    cantidadDescontadaP: qProd,
+    shipmentDiscount: dSend,
+    productDiscount: dProd,
+    amountShipmentDiscount: qSend,
+    amountProductDiscount: qProd,
     nuevoTotal: nTotal,
   }
 }
